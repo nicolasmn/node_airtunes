@@ -1,4 +1,4 @@
-var mdns = require('mdns');
+var mdns = require('mdns2');
 
 // Exit after one second as the mdns browser prevents node from exiting
 setTimeout(function() { process.exit(0); }, 1000);

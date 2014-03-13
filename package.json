@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "async": "*",
-    "mdns": "*"
+    "mdns2": "*"
   },
   "devDependencies": {
     "optimist": "*"
