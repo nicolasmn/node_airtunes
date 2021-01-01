@@ -6,12 +6,12 @@ using namespace node;
 
 namespace nodeairtunes {
 
-void InitCodec(Handle<Object>);
+void InitCodec(Local<Object>);
 #ifdef __APPLE__
-void InitCoreAudio(Handle<Object>);
+void InitCoreAudio(Local<Object>);
 #endif
 
-void Initialize(Handle<Object> target) {
+void Initialize(Local<Object> target) {
 
   Isolate* isolate = v8::Isolate::GetCurrent();
   HandleScope scope(isolate);

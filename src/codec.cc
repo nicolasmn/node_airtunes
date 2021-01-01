@@ -73,7 +73,8 @@ void NewEncoder(const FunctionCallbackInfo<Value>& args) {
   Local<ObjectTemplate> encoderClass = ObjectTemplate::New(isolate);
   encoderClass->SetInternalFieldCount(1);
 
-  Local<Object> obj = encoderClass->NewInstance();
+  Local<Object> obj;
+  encoderClass->NewInstance(isolate->GetCurrentContext()).ToLocal(&obj);
   obj->SetAlignedPointerInInternalField(0, encoder);
 
   args.GetReturnValue().Set(obj);
@@ -81,6 +82,7 @@ void NewEncoder(const FunctionCallbackInfo<Value>& args) {
 
 void EncodeALAC(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = Isolate::GetCurrent();
+  Local<Context> ctx = isolate->GetCurrentContext();
   EscapableHandleScope scope(isolate);
 
   if(args.Length() < 4) {
@@ -88,16 +90,21 @@ void EncodeALAC(const FunctionCallbackInfo<Value>& args) {
     args.GetReturnValue().Set(Null(isolate));
   }
 
-  Local<Object>wrapper = args[0]->ToObject();
+  Local<Object> wrapper;
+  args[0]->ToObject(ctx).ToLocal(&wrapper);
   ALACEncoder *encoder = (ALACEncoder*)wrapper->GetAlignedPointerFromInternalField(0);
 
   Local<Value> pcmBuffer = args[1];
-  unsigned char* pcmData = (unsigned char*)Buffer::Data(pcmBuffer->ToObject());
+  Local<Object> pcmObj;
+  pcmBuffer->ToObject(ctx).ToLocal(&pcmObj);
+  unsigned char* pcmData = (unsigned char*)Buffer::Data(pcmObj);
 
   Local<Value> alacBuffer = args[2];
-  unsigned char* alacData = (unsigned char*)Buffer::Data(alacBuffer->ToObject());
+  Local<Object> alacObj;
+  alacBuffer->ToObject(ctx).ToLocal(&alacObj);
+  unsigned char* alacData = (unsigned char*)Buffer::Data(alacObj);
 
-  int32_t pcmSize = args[3]->Int32Value();
+  int32_t pcmSize = args[3]->Int32Value(ctx).FromJust();
 
   AudioFormatDescription inputFormat, outputFormat;
   FillInputAudioFormat(&inputFormat);
@@ -111,6 +118,7 @@ void EncodeALAC(const FunctionCallbackInfo<Value>& args) {
 
 void EncryptAES(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = v8::Isolate::GetCurrent();
+  Local<Context> ctx = isolate->GetCurrentContext();
   EscapableHandleScope scope(isolate);
 
   if(args.Length() < 2) {
@@ -119,16 +127,18 @@ void EncryptAES(const FunctionCallbackInfo<Value>& args) {
   }
 
   Local<Value> alacBuffer = args[0];
-  unsigned char* alacData = (unsigned char*)Buffer::Data(alacBuffer->ToObject());
-  int32_t alacSize = args[1]->Int32Value();
+  Local<Object> alacObj;
+  alacBuffer->ToObject(ctx).ToLocal(&alacObj);
+  unsigned char* alacData = (unsigned char*)Buffer::Data(alacObj);
+  int32_t alacSize = args[1]->Int32Value(isolate->GetCurrentContext()).FromJust();
 
   // This will encrypt data in-place
   uint8_t *buf;
   int i = 0, j;
   uint8_t nv[kBlockSize];
 
-  aes_context ctx;
-  aes_set_key(&ctx, aes_key, 128);
+  aes_context aes_ctx;
+  aes_set_key(&aes_ctx, aes_key, 128);
   memcpy(nv, iv, kBlockSize);
 
   while(i + kBlockSize <= alacSize) {
@@ -137,7 +147,7 @@ void EncryptAES(const FunctionCallbackInfo<Value>& args) {
     for(j = 0; j < kBlockSize; j++)
       buf[j] ^= nv[j];
 
-    aes_encrypt(&ctx, buf, buf);
+    aes_encrypt(&aes_ctx, buf, buf);
     memcpy(nv, buf, kBlockSize);
 
     i += kBlockSize;
@@ -146,7 +156,7 @@ void EncryptAES(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(Null(isolate));
 }
 
-void InitCodec(Handle<Object> target) {
+void InitCodec(Local<Object> target) {
   NODE_SET_METHOD(target, "encodeALAC", EncodeALAC);
   NODE_SET_METHOD(target, "encryptAES", EncryptAES);
   NODE_SET_METHOD(target, "newEncoder", NewEncoder);
