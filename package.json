@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "async": "^3.2.0",
-    "mdns2": "*"
+    "mdns": "*"
   },
   "devDependencies": {
     "lame": "*",
