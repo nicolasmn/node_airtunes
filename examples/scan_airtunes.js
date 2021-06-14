@@ -1,11 +1,11 @@
-const mdns = require('mdns');
+var mdns = require('mdns2');
 
-const browser = mdns.createBrowser(mdns.tcp('raop'));
-browser.on('serviceUp', service => {
-  console.log(
-    `${service.name} ${service.host}:${service.port}`
-  );
+// Exit after one second as the mdns browser prevents node from exiting
+setTimeout(function() { process.exit(0); }, 1000);
+
+var browser = mdns.createBrowser(mdns.tcp('raop'));
+
+browser.on('serviceUp', function(service) {
+  console.log(service.name.match(/.*@(.*)/)[1] + " " + service.host + ":" + service.port);
 });
 browser.start();
-
-setTimeout(() => {browser.stop()},300);
