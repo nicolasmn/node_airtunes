@@ -1,5 +1,9 @@
-node-airtunes - a node.js implementation of AirTunes v2
+node-airtunes2 - a node.js implementation of AirTunes v2
 =======================================================
+
+This package is fork of Laurent Perrin <laurent.perrin@gmail.com> implementation and all credits must go to him! My contribution is in added HomePod compatibility, which was achieved by heartbeat message being sent to HomePod every 60 seconds.
+
+I have also changed package name to airtunes2 and changed versioning scheme - now we are starting with 1.0.0.
 
 I'm in a hurry
 --------------
@@ -14,6 +18,7 @@ The example folder contains several test scripts:
 
 * `cat sample.pcm | node play_stdin.js --host yourhost` will stream PCM data passed by stdin.
 * `play_ffmpeg.js` harnesses ffmpeg to stream from local audio files or remote URLs.
+* `play_lame.js` use JavaScript lame decoder to converd mp3 stream to PCM
 * `scan_airtunes.js` will list nearby AirTunes devices (OS X only).
 
 What is AirTunes ?
@@ -143,6 +148,7 @@ Node-airtunes was tested on the following devices:
 * Zeppelin Air
 * Raspberry PI
 * Bose SoundTouch
+* HomePod
 
 Ping me to add more devices to this list.
 
